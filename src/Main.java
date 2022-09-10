@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
 
         Scanner scanner = new Scanner(System.in);
 
@@ -22,7 +22,7 @@ public class Main {
             System.out.println("Выберите товар и количество или введите `end`");
             String input = scanner.nextLine();
             if (input.equals("end")) {
-                basket.saveTxt(new File("basket.txt"));
+                basket.saveBin(new File("basket.bin"));
                 break;
             }
             String[] parts = input.split(" ");

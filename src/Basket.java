@@ -1,24 +1,17 @@
 import java.io.*;
 
-public class Basket {
+public class Basket implements Serializable {
 
     protected String[] products;
     protected int[] prices;
     protected int[] basket;
 
-    public Basket(String[] products, int[] prices, int[] basket) {
-        this.products = products;
-        this.prices = prices;
-        this.basket = basket;
-    }
-
-
-    public Basket(String[] products, int[] prices) throws IOException {
-        Basket basketTxt = loadFromTxtFile(new File("basket.txt"));
-        if (basketTxt != null) {
-            this.products = basketTxt.getProducts();
-            this.prices = basketTxt.getPrices();
-            this.basket = basketTxt.getBasket();
+    public Basket(String[] products, int[] prices) throws IOException, ClassNotFoundException {
+        Basket basketBin = loadFromBinFile(new File("basket.bin"));
+        if (basketBin != null) {
+            this.products = basketBin.getProducts();
+            this.prices = basketBin.getPrices();
+            this.basket = basketBin.getBasket();
         } else {
             this.products = products;
             this.prices = prices;
@@ -26,28 +19,13 @@ public class Basket {
         }
     }
 
-    public static Basket loadFromTxtFile(File textFile) throws IOException {
-        Basket toRead = null;
-        if (textFile.exists() & textFile.length() != 0) {
-            try (BufferedReader bufferedReader = new BufferedReader(new FileReader(textFile))) {
-                int count = 0;
-                int size = 5;
-                String[] products = new String[size];
-                int[] basket = new int[size];
-                int[] price = new int[size];
-                String read;
-                while ((read = bufferedReader.readLine()) != null) {
-                    String[] strings = read.split("/");
-                    products[count] = strings[0];
-                    basket[count] = Integer.parseInt(strings[1]);
-                    price[count] = Integer.parseInt(strings[2]);
-                    count++;
-                }
-                toRead = new Basket(products, price, basket);
 
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+    public static Basket loadFromBinFile(File file) throws IOException, ClassNotFoundException {
+        Basket toRead = null;
+        if (file.exists() & file.length() != 0) {
+            var fis = new FileInputStream(file);
+            var ois = new ObjectInputStream(fis);
+            toRead = (Basket) ois.readObject();
         }
         return toRead;
     }
@@ -74,22 +52,18 @@ public class Basket {
         for (int c = 0; c < products.length; c++) {
             int toPay = basket[c] * prices[c];
             if (basket[c] > 0) {
-                System.out.println((c + 1) + " " + products[c] + ", " + basket[c] + " шт., " + toPay + " руб. в сумме");
+                System.out.println(products[c] + ", " + basket[c] + " шт., " + toPay + " руб. в сумме");
                 sum += toPay;
             }
         }
         System.out.println("Итого к оплате: " + sum + " руб.");
     }
 
-    public void saveTxt(File textFile) throws IOException {
-        try (BufferedWriter out = new BufferedWriter(new FileWriter(textFile))) {
-
-            for (int i = 0; i < products.length; i++) {
-                out.write(products[i] + "/" + basket[i] + "/" + prices[i] + "\r\n");
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public void saveBin(File file) throws IOException {
+        var fos = new FileOutputStream(file);
+        var oos = new ObjectOutputStream(fos);
+        oos.writeObject(this);
+        oos.close();
     }
 }
 
