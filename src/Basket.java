@@ -74,7 +74,7 @@ public class Basket {
         for (int c = 0; c < products.length; c++) {
             int toPay = basket[c] * prices[c];
             if (basket[c] > 0) {
-                System.out.println((c + 1) + " " + products[c] + ", " + basket[c] + " шт., " + toPay + " руб. в сумме");
+                System.out.println(products[c] + ", " + basket[c] + " шт., " + toPay + " руб. в сумме");
                 sum += toPay;
             }
         }
