@@ -23,9 +23,13 @@ public class Basket implements Serializable {
     public static Basket loadFromBinFile(File file) throws IOException, ClassNotFoundException {
         Basket toRead = null;
         if (file.exists() & file.length() != 0) {
-            var fis = new FileInputStream(file);
-            var ois = new ObjectInputStream(fis);
-            toRead = (Basket) ois.readObject();
+            ObjectInputStream ois;
+            try (var fis = new FileInputStream(file)) {
+                ois = new ObjectInputStream(fis);
+                toRead = (Basket) ois.readObject();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
         return toRead;
     }
@@ -60,10 +64,13 @@ public class Basket implements Serializable {
     }
 
     public void saveBin(File file) throws IOException {
-        var fos = new FileOutputStream(file);
-        var oos = new ObjectOutputStream(fos);
-        oos.writeObject(this);
-        oos.close();
+        ObjectOutputStream oos;
+        try (var fos = new FileOutputStream(file)) {
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(this);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
