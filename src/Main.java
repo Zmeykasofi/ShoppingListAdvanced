@@ -3,14 +3,24 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
+
     public static void main(String[] args) throws IOException, ClassNotFoundException {
 
         Scanner scanner = new Scanner(System.in);
 
         String[] products = {"Батон белый", "Бананы (1 кг)", "Шоколад Milka", "Чизкейк", "Кофе"};
         int[] prices = {45, 90, 110, 395, 434};
+        int[] inBasket = new int[products.length];
 
-        Basket basket = new Basket(products, prices);
+        Basket cart = new Basket(products, prices, inBasket);
+
+        File basketBin = new File("basket.bin");
+
+        if (!basketBin.createNewFile()) {
+            cart = Basket.loadFromBinFile(basketBin);
+            System.out.println("Корзина восстановлена из файла.");
+            System.out.println("Продолжим покупки!");
+        }
 
         System.out.println("Список возможных товаров для покупки:");
 
@@ -22,14 +32,14 @@ public class Main {
             System.out.println("Выберите товар и количество или введите `end`");
             String input = scanner.nextLine();
             if (input.equals("end")) {
-                basket.saveBin(new File("basket.bin"));
+                cart.saveBin(basketBin);
                 break;
             }
             String[] parts = input.split(" ");
             int productNum = Integer.parseInt(parts[0]) - 1;
             int amount = Integer.parseInt(parts[1]);
-            basket.addToCart(productNum, amount);
+            cart.addToCart(productNum, amount);
         }
-        basket.printCart();
+        cart.printCart();
     }
 }
