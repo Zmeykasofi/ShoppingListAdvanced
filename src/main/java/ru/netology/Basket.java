@@ -10,11 +10,13 @@ public class Basket {
     protected int[] inBasket;
 
     protected int sum = 0;
+
     public Basket(String[] products, int[] prices, int[] inBasket) {
         this.products = products;
         this.prices = prices;
         this.inBasket = inBasket;
     }
+
     public static Basket loadFromTxtFile(File textFile, String[] products) {
         Basket toRead = null;
         if (textFile.exists() & textFile.length() != 0) {
@@ -55,6 +57,7 @@ public class Basket {
         }
         System.out.println("Итого к оплате: " + sum + " руб.");
     }
+
     public void saveTxt(File textFile) {
         try (BufferedWriter out = new BufferedWriter(new FileWriter(textFile))) {
             for (int i = 0; i < products.length; i++) {

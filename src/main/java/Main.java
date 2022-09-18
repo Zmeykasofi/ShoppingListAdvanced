@@ -14,11 +14,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         boolean loading = true;
         String loadingFileName = null;
@@ -90,34 +91,26 @@ public class Main {
         Basket cart = new Basket(products, prices, inBasket);
         ClientLog clientLog = new ClientLog();
 
-        File basketTxt = new File("basket.txt");
-        if (loadingFileName == null) throw new AssertionError();
-        File logCsv = new File("log.csv");
-        if (loggingFileName == null) throw new AssertionError();
-        File basketJson = new File("basket.json");
-        if (savingFileName == null) throw new AssertionError();
-
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
 
-        if (loading && loadingFileFormat.equals("json")) {
-            if (!basketJson.createNewFile()) {
-                try (JsonReader reader = new JsonReader(new FileReader(basketJson))) {
-                    cart = gson.fromJson(reader, Basket.class);
-                    System.out.println("Корзина восстановлена из файла.");
-                    cart.printCart();
-                    System.out.println("Продолжим покупки!");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        } else if (loading && loadingFileFormat.equals("txt")){
-            if (!basketTxt.createNewFile()) {
-                cart = Basket.loadFromTxtFile(basketTxt, products);
+        if (loading && Objects.requireNonNull(loadingFileFormat).equals("json")) {
+            assert loadingFileName != null;
+            try (JsonReader reader = new JsonReader(new FileReader(loadingFileName))) {
+                cart = gson.fromJson(reader, Basket.class);
                 System.out.println("Корзина восстановлена из файла.");
                 cart.printCart();
                 System.out.println("Продолжим покупки!");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
+        } else if (loading && loadingFileFormat.equals("txt")) {
+            assert loadingFileName != null;
+            cart = Basket.loadFromTxtFile(new File(loadingFileName), products);
+            System.out.println("Корзина восстановлена из файла.");
+            cart.printCart();
+            System.out.println("Продолжим покупки!");
         }
 
         System.out.println("Список возможных товаров для покупки:");
@@ -140,21 +133,19 @@ public class Main {
 
             if (savingFileFormat != null) {
                 if (saving && savingFileFormat.equals("json")) {
-                    try (FileWriter jsonWriter = new FileWriter(basketJson)) {
+                    try (FileWriter jsonWriter = new FileWriter(savingFileName)) {
                         jsonWriter.write(gson.toJson(cart));
                         jsonWriter.flush();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 } else if (saving && savingFileFormat.equals("txt")) {
-                    cart.saveTxt(basketTxt);
+                    cart.saveTxt(new File(savingFileName));
                 }
             }
         }
-
-        logCsv.createNewFile();
         if (logging) {
-            clientLog.exportAsCSV(logCsv);
+            clientLog.exportAsCSV(new File(Objects.requireNonNull(loggingFileName)));
         }
         cart.printCart();
     }
